@@ -359,10 +359,17 @@ defmodule XLA do
             ~s/--action_env=TF_ROCM_CLANG="1"/,
             ~s/--action_env=TF_HIPCC_CLANG="1"/,
             # See https://github.com/jax-ml/jax/blob/098e953afb2b83daf85e6456c89e896f9cfd483d/.bazelrc#L239
-            # GPU targets: MI200 (gfx90a), MI300 (gfx942), RDNA2 (gfx1030), RDNA3 (gfx1100), RDNA4 (gfx120x)
+            # GPU targets: MI200 (gfx90a), MI300 (gfx942), RDNA2 (gfx1030), RDNA3 (gfx1100),
+            #              RDNA 3.5 APUs Strix Point/Halo (gfx1150/gfx1151), RDNA4 (gfx120x)
             # Note: gfx900/906/908 (Vega, MI50/60, MI100) removed - deprecated in ROCm 7.x
             # Note: gfx940/941 removed - not valid LLVM targets, MI300 uses gfx942
-            ~s/--action_env=TF_ROCM_AMDGPU_TARGETS="gfx90a,gfx942,gfx1030,gfx1100,gfx1200,gfx1201"/
+            ~s/--action_env=TF_ROCM_AMDGPU_TARGETS="gfx90a,gfx942,gfx1030,gfx1100,gfx1150,gfx1151,gfx1200,gfx1201"/,
+            # Preserve the ROCm platform's static initialiser. Without this, the
+            # linker may drop the REGISTER_MODULE_INITIALIZER for ROCm and the
+            # platform silently disappears at runtime
+            # (EXLA.NIF.get_supported_platforms() returns no :rocm key).
+            # Pairs with the BUILD-file dep on //xla/stream_executor/rocm:all_runtime.
+            "--linkopt=-Wl,--no-gc-sections"
           ]
 
         "tpu" <> _ ->
