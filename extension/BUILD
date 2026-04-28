@@ -110,7 +110,7 @@ cc_binary(
     "//xla/stream_executor:cuda_platform"
   ])
   + if_rocm([
-    "//xla/stream_executor:rocm_platform"
+    "//xla/stream_executor/rocm:all_runtime"
   ]),
   copts = ["-fvisibility=default"],
   linkopts= select({
